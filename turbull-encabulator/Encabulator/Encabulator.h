@@ -215,8 +215,14 @@ class TurBullEncabulator
 {
 	private:
 		static bool _verbose;
+
+        // history/state for scanner
         static uint8_t scanBar;
         static uint8_t scanDirection;
+
+        // digital input
+        static uint8_t inputPinState;
+
 	public: 
 		TurBullEncabulator() {};
 		DACHelper dac;
@@ -240,6 +246,8 @@ class TurBullEncabulator
 
         void startRedScanner();
         void stepScanner();
+
+        bool areTheyKissing();
 };
 
 

@@ -609,11 +609,11 @@ void TurBullEncabulator::lightUpBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b)
 
     // fade in
     for (i = 1; i <= n; i++) {
-        stripBankA.fadeHeaderToRGB(i,r,g,b,5);
+        stripBankA.fadeHeaderToRGB(i,r,g,b,20);
     }
     if (n > 4) {
         for (i = 1; i < (n-3); i++) {
-            stripBankB.fadeHeaderToRGB(i,r,g,b,5);
+            stripBankB.fadeHeaderToRGB(i,r,g,b,20);
         }
     }
 }
@@ -622,22 +622,23 @@ void TurBullEncabulator::lightUpBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b)
 void TurBullEncabulator::startRedScanner() {
     blackoutBars();
     scanBar = 1;
-    stripBankA.jumpHeaderToRGB(1,255,0,0);
+    stripBankA.fadeHeaderToRGB(1,255,0,0,5);
 }
 
 // step scanner to next bar in cycle
 void TurBullEncabulator::stepScanner() {
     // nobody's perfect
     if ((scanBar < 1) || (scanBar > 8)) {
+        blackoutBars();
         return;
     }
 
     // blackout lit bar
     if (scanBar < 5) {
-        stripBankA.jumpHeaderToRGB(scanBar,0,0,0);
+        stripBankA.fadeHeaderToRGB(scanBar,0,0,0,5);
     }
     else {
-        stripBankB.jumpHeaderToRGB(scanBar-4,0,0,0);
+        stripBankB.fadeHeaderToRGB(scanBar-4,0,0,0,5);
     }
 
     // figure out which one to light up next
@@ -655,10 +656,33 @@ void TurBullEncabulator::stepScanner() {
 
     // light 'er up!
     if (scanBar < 5) {
-        stripBankA.jumpHeaderToRGB(scanBar,255,0,0);
+        stripBankA.fadeHeaderToRGB(scanBar,255,0,0,5);
     }
     else {
-        stripBankB.jumpHeaderToRGB(scanBar-4,255,0,0);
+        stripBankB.fadeHeaderToRGB(scanBar-4,255,0,0,5);
+    }
+}
+
+// detect digital input
+#define KISS_INPUT_PIN 2
+bool TurBullEncabulator::areTheyKissing() {
+
+    // kiss on
+    if (digitalRead(KISS_INPUT_PIN) == LOW) {
+        if (_verbose && (inputPinState == 2)) {
+            Serial.println("KISSING IN PROGRESS!");
+        }
+        inputPinState = 1;
+        return true;
+    }
+
+    // kiss off
+    else {
+        if (_verbose && (inputPinState == 1)) {
+            Serial.println("Kissing has stopped... get on this, people.");
+        }
+        inputPinState = 2;
+        return false;
     }
 }
 
@@ -684,11 +708,17 @@ void TurBullEncabulator::upUpDownDownLeftRightLeftRightBA() {
 
     scanBar = 0;
     scanDirection = 0;
+
+    pinMode(KISS_INPUT_PIN, INPUT_PULLUP);
 }
 
+
+// not sure why this isn't in a constructor
 bool TurBullEncabulator::_verbose = false;
 uint8_t TurBullEncabulator::scanBar = 0;
 uint8_t TurBullEncabulator::scanDirection = 0;
+uint8_t TurBullEncabulator::inputPinState = 0;
+
 
 void TurBullEncabulator::setVerbose(bool b) {
 	if (b) {
