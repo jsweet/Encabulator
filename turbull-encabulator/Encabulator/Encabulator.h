@@ -215,6 +215,8 @@ class TurBullEncabulator
 {
 	private:
 		static bool _verbose;
+        static uint8_t scanBar;
+        static uint8_t scanDirection;
 	public: 
 		TurBullEncabulator() {};
 		DACHelper dac;
@@ -232,6 +234,12 @@ class TurBullEncabulator
 		
 		void testPattern();
 		void blackout();
+
+        void blackoutBars();
+        void lightUpBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b);
+
+        void startRedScanner();
+        void stepScanner();
 };
 
 

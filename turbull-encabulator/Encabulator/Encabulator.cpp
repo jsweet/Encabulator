@@ -224,6 +224,13 @@ void Addr1XMultiTool::drawGradient(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r
     delay(5);
 }
 
+// r g b are 0-255
+// cometLength is how far down the strip the comet travels (max 64)
+//   (it goes out and back)
+// tailLength is how many lights long the comet is
+// speed is 1 (fastest), 4 is pretty slow
+// since subsequent calls to drawComet start in the same place the last one ended, you can change
+// its color/length/speed in-place and it'll look good
 void Addr1XMultiTool::drawComet(uint8_t r, uint8_t g, uint8_t b, uint8_t cometLength, uint8_t tailLength, uint8_t speed) {
 #ifdef USE_I2C_REV5_INSTEAD_OF_WIRE
 	uint8_t params[7];
@@ -583,6 +590,79 @@ void TurBullEncabulator::blackout() {
 	stripBankB.blackout();
 }
 
+// blackout strip banks 
+void TurBullEncabulator::blackoutBars() {
+    uint8_t i;
+
+    // blackout all 8 headers
+    for (i = 1 ; i < 5; i++) {
+        stripBankA.jumpHeaderToRGB(i,0,0,0);
+        stripBankB.jumpHeaderToRGB(i,0,0,0);
+    }
+}
+
+// light up 1-8 bars all the same color
+void TurBullEncabulator::lightUpBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t i;
+
+    blackoutBars();
+
+    // fade in
+    for (i = 1; i <= n; i++) {
+        stripBankA.fadeHeaderToRGB(i,r,g,b,5);
+    }
+    if (n > 4) {
+        for (i = 1; i < (n-3); i++) {
+            stripBankB.fadeHeaderToRGB(i,r,g,b,5);
+        }
+    }
+}
+
+// start cylon-style red scanner behavior
+void TurBullEncabulator::startRedScanner() {
+    blackoutBars();
+    scanBar = 1;
+    stripBankA.jumpHeaderToRGB(1,255,0,0);
+}
+
+// step scanner to next bar in cycle
+void TurBullEncabulator::stepScanner() {
+    // nobody's perfect
+    if ((scanBar < 1) || (scanBar > 8)) {
+        return;
+    }
+
+    // blackout lit bar
+    if (scanBar < 5) {
+        stripBankA.jumpHeaderToRGB(scanBar,0,0,0);
+    }
+    else {
+        stripBankB.jumpHeaderToRGB(scanBar-4,0,0,0);
+    }
+
+    // figure out which one to light up next
+    if (scanBar == 1) {
+        scanBar = 2;
+        scanDirection = 1;
+    } else if (scanBar == 8) {
+        scanBar = 7;
+        scanDirection = 0;
+    } else if (scanDirection == 1) {
+        scanBar++;
+    } else {
+        scanBar--;
+    }
+
+    // light 'er up!
+    if (scanBar < 5) {
+        stripBankA.jumpHeaderToRGB(scanBar,255,0,0);
+    }
+    else {
+        stripBankB.jumpHeaderToRGB(scanBar-4,255,0,0);
+    }
+}
+
+
 void TurBullEncabulator::upUpDownDownLeftRightLeftRightBA() {
 
 #ifdef USE_I2C_REV5_INSTEAD_OF_WIRE
@@ -601,9 +681,14 @@ void TurBullEncabulator::upUpDownDownLeftRightLeftRightBA() {
 	dmx = DMX1XUniverse();
 	stripBankA = RGB4XStripA();
 	stripBankB = RGB4XStripB();
+
+    scanBar = 0;
+    scanDirection = 0;
 }
 
 bool TurBullEncabulator::_verbose = false;
+uint8_t TurBullEncabulator::scanBar = 0;
+uint8_t TurBullEncabulator::scanDirection = 0;
 
 void TurBullEncabulator::setVerbose(bool b) {
 	if (b) {

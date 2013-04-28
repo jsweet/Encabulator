@@ -1,0 +1,52 @@
+#include <Encabulator.h>
+#include <Wire.h>
+
+int R0 = 0;
+int G0 = 0;
+int B0 = 0;
+int R1 = 0;
+int G1 = 0;
+int B1 = 0;
+int i = 0;
+int length = 0;
+int tail = 0;
+int speed = 0;
+
+void setup() {               
+  
+  Encabulator.upUpDownDownLeftRightLeftRightBA();
+
+  // enable some debugging on the serial port
+
+  Encabulator.setVerbose(true);
+
+}
+
+void loop() {
+   
+  R0 = random(255);
+  G0 = random(255);
+  B0 = random(255);
+  R1 = random(255);
+  G1 = random(255);
+  B1 = random(255);
+
+  // random gradient
+  Encabulator.addressable.drawGradient(R0,G0,B0,R1,G1,B1,64);   
+  delay(1000);
+
+  // shift buffer 100x on one direction
+  for (i=0; i<100; i++) {
+    Encabulator.addressable.shiftBufferOnce(1,1);
+    delay(100);
+  }
+
+  // random comet
+  length = random(5);
+  tail = random(5);
+  speed = randoms(5);
+  Encabulator.addressable.drawComet(R0,G0,B0,length,tail,speed);
+  delay(1000);
+  
+}
+
