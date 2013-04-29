@@ -218,6 +218,9 @@ class TurBullEncabulator
 
         // history/state for scanner
         static uint8_t scanBar;
+        static uint8_t scanRed;
+        static uint8_t scanGreen;
+        static uint8_t scanBlue;
         static uint8_t scanDirection;
 
         // digital input
@@ -243,8 +246,12 @@ class TurBullEncabulator
 
         void blackoutBars();
         void lightUpBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b);
+        void rainbowBars(uint8_t n);
+        void pulseBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b);
 
         void startRedScanner();
+        void startScanner();
+        void setScannerColor(uint8_t r, uint8_t g, uint8_t b);
         void stepScanner();
 
         bool areTheyKissing();

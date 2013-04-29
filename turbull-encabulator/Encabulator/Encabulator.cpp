@@ -618,11 +618,129 @@ void TurBullEncabulator::lightUpBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b)
     }
 }
 
+// light up a ROYGTBIV rainbow, then show score
+void TurBullEncabulator::rainbowBars(uint8_t n) {
+    uint8_t i;
+
+    blackoutBars();
+
+    for (i = 0; i < 3; i++) {
+        stripBankA.jumpHeaderToRGB(1,255,0,0); // red
+        delay(100);
+        stripBankA.jumpHeaderToRGB(1,0,0,0);
+        stripBankA.jumpHeaderToRGB(2,255,128,0); // orange
+        delay(100);
+        stripBankA.jumpHeaderToRGB(2,0,0,0);
+        stripBankA.jumpHeaderToRGB(3,255,255,0); // yellow
+        delay(100);
+        stripBankA.jumpHeaderToRGB(3,0,0,0);
+        stripBankA.jumpHeaderToRGB(4,0,255,0); // green
+        delay(100);
+        stripBankA.jumpHeaderToRGB(4,0,0,0);
+        stripBankB.jumpHeaderToRGB(1,0,128,255); // teal
+        delay(100);
+        stripBankB.jumpHeaderToRGB(1,0,0,0);
+        stripBankB.jumpHeaderToRGB(2,0,0,255); // blue
+        delay(100);
+        stripBankB.jumpHeaderToRGB(2,0,0,0);
+        stripBankB.jumpHeaderToRGB(3,204,0,204); // indigo
+        delay(100);
+        stripBankB.jumpHeaderToRGB(3,0,0,0);
+        stripBankB.jumpHeaderToRGB(4,127,0,255); // violet
+        delay(100);
+        stripBankB.jumpHeaderToRGB(4,0,0,0);
+    }
+
+    stripBankA.jumpHeaderToRGB(1,255,0,0); // red
+    if (n > 1) {
+        delay(100);
+        stripBankA.jumpHeaderToRGB(2,255,128,0); // orange
+    }
+    if (n > 2) {
+        delay(100);
+        stripBankA.jumpHeaderToRGB(3,255,255,0); // yellow
+    }
+    if (n > 3) {
+        delay(200);
+        stripBankA.jumpHeaderToRGB(4,0,255,0); // green
+    }
+    if (n > 4) {
+        delay(200);
+        stripBankB.jumpHeaderToRGB(1,0,128,255); // teal
+    }
+    if (n > 5) {
+        delay(400);
+        stripBankB.jumpHeaderToRGB(2,0,0,255); // blue
+    }
+    if (n > 6) {
+        delay(400);
+        stripBankB.jumpHeaderToRGB(3,204,0,204); // indigo
+    }
+    if (n > 7) {
+        delay(400);
+        stripBankB.jumpHeaderToRGB(4,127,0,255); // violet
+    }
+}
+
+// light up n bars, then pulse them gently 3 times
+void TurBullEncabulator::pulseBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t i;
+    uint8_t j;
+
+    blackoutBars();
+
+    for (j = 0; j < 3; j++) {
+        // fade in
+        for (i = 1; i <= n; i++) {
+            stripBankA.fadeHeaderToRGB(i,r,g,b,20);
+        }
+        if (n > 4) {
+          for (i = 1; i < (n-3); i++) {
+            stripBankB.fadeHeaderToRGB(i,r,g,b,20);
+          }
+        }
+        delay(100);
+        // fade out
+        for (i = 1; i <= n; i++) {
+            stripBankA.fadeHeaderToRGB(i,0,0,0,20);
+        }
+        if (n > 4) {
+          for (i = 1; i < (n-3); i++) {
+            stripBankB.fadeHeaderToRGB(i,0,0,0,20);
+          }
+        }
+    }
+
+    // fade in
+    for (i = 1; i <= n; i++) {
+      stripBankA.fadeHeaderToRGB(i,r,g,b,20);
+    }
+    if (n > 4) {
+      for (i = 1; i < (n-3); i++) {
+        stripBankB.fadeHeaderToRGB(i,r,g,b,20);
+      }
+    }
+
+}
+
 // start cylon-style red scanner behavior
 void TurBullEncabulator::startRedScanner() {
+    setScannerColor(255,0,0);
+    startScanner();
+}
+
+// change scanner color
+void TurBullEncabulator::setScannerColor(uint8_t r, uint8_t g, uint8_t b) {
+    scanRed = r;
+    scanGreen = g;
+    scanBlue = b;
+}
+
+// start scanner 
+void TurBullEncabulator::startScanner() {
     blackoutBars();
     scanBar = 1;
-    stripBankA.fadeHeaderToRGB(1,255,0,0,5);
+    stripBankA.fadeHeaderToRGB(1,scanRed,scanGreen,scanBlue,5);
 }
 
 // step scanner to next bar in cycle
@@ -668,7 +786,7 @@ void TurBullEncabulator::stepScanner() {
 bool TurBullEncabulator::areTheyKissing() {
 
     // kiss on
-    if (digitalRead(KISS_INPUT_PIN) == LOW) {
+    if (digitalRead(KISS_INPUT_PIN) == HIGH) {
         if (_verbose && (inputPinState == 2)) {
             Serial.println("KISSING IN PROGRESS!");
         }
@@ -717,6 +835,9 @@ void TurBullEncabulator::upUpDownDownLeftRightLeftRightBA() {
 bool TurBullEncabulator::_verbose = false;
 uint8_t TurBullEncabulator::scanBar = 0;
 uint8_t TurBullEncabulator::scanDirection = 0;
+uint8_t TurBullEncabulator::scanRed = 0;
+uint8_t TurBullEncabulator::scanGreen = 0;
+uint8_t TurBullEncabulator::scanBlue = 0;
 uint8_t TurBullEncabulator::inputPinState = 0;
 
 
