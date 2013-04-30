@@ -8,9 +8,9 @@ unsigned long scanStepStarted = 0;
 int score = 0;
 
 // delay (ms) between scanner steps (bars moving)
-#define SCAN_INTERVAL_LOW 200
-#define SCAN_INTERVAL_MED 100
-#define SCAN_INTERVAL_HIGH 50
+#define SCAN_INTERVAL_LOW 800
+#define SCAN_INTERVAL_MED 400
+#define SCAN_INTERVAL_HIGH 200
 #define SCAN_BRIGHTNESS_LOW 100
 #define SCAN_BRIGHTNESS_MED 175
 #define SCAN_BRIGHTNESS_HIGH 255
@@ -126,8 +126,8 @@ void loop() {
       score = ((kissEnded - kissStarted) / KISS_QUANTUM) + 1;
 
       // choose a score display randomly
-      int scoreDisplay = random(1,6);
-      if (scoreDisplay == 1) {
+      int scoreDisplay = random(1,7);
+      if (scoreDisplay <= 1) {
           Encabulator.lightUpBars(score, 255, 255, 255); // white bars
       } else if (scoreDisplay == 2) {
           Encabulator.lightUpBars(score, 255, 255, 0); // yellow bars
@@ -137,7 +137,7 @@ void loop() {
           Encabulator.pulseBars(score, 255, 0, 0); // red pulse
       } else if (scoreDisplay == 5) {
           Encabulator.pulseBars(score, 0, 255, 0); // green pulse
-      } else if (scoreDisplay == 6) {
+      } else if (scoreDisplay >= 6) {
           Encabulator.pulseBars(score, 255, 255, 255); // white pulse
       }
       delay(5000);

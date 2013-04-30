@@ -222,6 +222,8 @@ class TurBullEncabulator
         static uint8_t scanGreen;
         static uint8_t scanBlue;
         static uint8_t scanDirection;
+        static uint8_t scanMode;
+        static bool scanBlebs[8];
 
         // digital input
         static uint8_t inputPinState;
@@ -245,6 +247,11 @@ class TurBullEncabulator
 		void blackout();
 
         void blackoutBars();
+        void jumpBar(uint8_t n);
+        void fadeBar(uint8_t n, uint8_t s);
+        void jumpBarRGB(uint8_t n, uint8_t r, uint8_t g, uint8_t b);
+        void fadeBarRGB(uint8_t n, uint8_t r, uint8_t g, uint8_t b, uint8_t s);
+
         void lightUpBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b);
         void rainbowBars(uint8_t n);
         void pulseBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b);
@@ -252,7 +259,16 @@ class TurBullEncabulator
         void startRedScanner();
         void startScanner();
         void setScannerColor(uint8_t r, uint8_t g, uint8_t b);
+        void setScannerColorSimple(uint8_t color);
+        void setScannerMode(uint8_t mode);
         void stepScanner();
+
+        void startCylon();
+        void stepCylon();
+        void startPulse();
+        void stepPulse();
+        void startBlebs();
+        void stepBlebs();
 
         bool areTheyKissing();
 };

@@ -1,47 +1,59 @@
 #include <Encabulator.h>
 #include <Wire.h>
 
-int ra = 0;
-int ga = 0;
-int ba = 0;
-int rb = 0;
-int gb = 0;
-int bb = 0;
-int i = 0;
+int cometColor = 0;
+unsigned long lastTick = 0;
+
+#define CLOCK_TICK_LENGTH 4000
+
+// test various methods for toggling the comet display on and off
+// (in the first KissingBooth proto the comet would not turn back on) 
+//
+// if this works, you should see a red comet for 4 secs., then
+// blackout for 4 secs., then green for 4, then black, then blue, then
+// black again.  then the cycle repeats.
 
 void setup() {               
   
   Encabulator.upUpDownDownLeftRightLeftRightBA();
   Encabulator.setVerbose(true);
 
+  Encabulator.addressable.drawComet(255,0,0,64,4,1);
+  cometColor = 0;
+  lastTick = millis();
+}
+
+// comment/uncomment these to see which one works
+void blackout() {
+  Encabulator.addressable.blackout();
+  //Encabulator.addressable.drawGradient(0,0,0,0,0,0,64);   
+  //Encabulator.addressable.drawComet(0,0,0,8,8,1);
 }
 
 void loop() {
-   
-  for (i = 0; i < 10; i++) {
-      ra = random(255);
-      ga = random(255);
-      ba = random(255);
-      rb = random(255);
-      gb = random(255);
-      bb = random(255);
 
-      // random gradient
-      Encabulator.addressable.drawGradient(ra,ga,ba,rb,gb,bb,64);   
-      delay(1000);
+  if ((millis() - lastTick) > CLOCK_TICK_LENGTH) {
+
+      if (cometColor == 1) {
+          Encabulator.addressable.drawComet(0,255,0,64,4,1);
+      }
+      else if (cometColor == 3) {
+          Encabulator.addressable.drawComet(0,0,255,64,4,1);
+      }
+      else if (cometColor == 5) {
+          Encabulator.addressable.drawComet(255,0,0,64,4,1);
+      }
+      else {
+          blackout();
+      }
+
+      cometColor++;
+      if (cometColor > 5) {
+        cometColor = 0;
+      }
+
+      lastTick = millis();
   }
 
-  Encabulator.addressable.drawGradient(0,0,0,0,0,0,64);   
-
-  for (i = 0; i < 4; i++) {
-      // color-changing comet
-      Encabulator.addressable.drawComet(255,0,0,64,4,1);
-      delay(10000);
-      Encabulator.addressable.drawComet(0,255,0,64,4,1);
-      delay(10000);
-      Encabulator.addressable.drawComet(0,0,255,64,4,1);
-      delay(10000);
-  }
-  
 }
 

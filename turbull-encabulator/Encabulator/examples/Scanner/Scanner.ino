@@ -1,26 +1,34 @@
 #include <Encabulator.h>
 #include <Wire.h>
 
-int i = 0;
-int j = 0;
+int scanCountdown = 0;
+unsigned long lastStep = 0;
+
+#define SCAN_INTERVAL 200
 
 void setup() {               
   
   Encabulator.upUpDownDownLeftRightLeftRightBA();
   Encabulator.setVerbose(true);
 
+  scanCountdown = 0;
 }
 
 void loop() {
    
-    Encabulator.startRedScanner();
+  if (scanCountdown == 0) {
+      scanCountdown = 100;
+      lastStep = millis();
+      // pick a random color and mode
+      Encabulator.setScannerMode(random(3));
+      Encabulator.setScannerColorSimple(random(1,10));
+      Encabulator.startScanner();
+  }
 
-    // cycle through four times, getting faster each time
-    for (i = 0; i < 5; i++) {
-        for (j = 0; j < 32; j++) {
-            Encabulator.stepScanner();
-            delay((5-i)*100);
-        }
-    }
+  if ((millis() - lastStep) > SCAN_INTERVAL) {
+      scanCountdown--;
+      lastStep = millis();
+      Encabulator.stepScanner();
+  }
   
 }
