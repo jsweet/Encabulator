@@ -271,6 +271,7 @@ class TurBullEncabulator
         void stepBlebs();
 
         bool areTheyKissing();
+        void drawComet();
 };
 
 

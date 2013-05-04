@@ -680,14 +680,14 @@ void TurBullEncabulator::pulseBars(uint8_t n, uint8_t r, uint8_t g, uint8_t b) {
     for (j = 0; j < 3; j++) {
         // fade in
         for (i = 1; i <= n; i++) {
-            fadeBar(i,20);
+            fadeBar(i,5);
         }
-        delay(100);
+        delay(200);
         // fade out
         for (i = 1; i <= n; i++) {
-          fadeBarRGB(i,0,0,0,20);
+          fadeBarRGB(i,0,0,0,5);
         }
-        delay(100);
+        delay(200);
     }
 
     // fade in
@@ -762,7 +762,7 @@ void TurBullEncabulator::startScanner() {
     if (scanMode == 0) {
         startCylon();
     } else if (scanMode == 1) {
-        startPulse();
+        stepPulse();
     } else {
         startBlebs();
     }
@@ -790,7 +790,8 @@ void TurBullEncabulator::startCylon() {
 // move to next bar in cycle
 void TurBullEncabulator::stepCylon() {
     // fade out lit bar
-    fadeBarRGB(scanBar,0,0,0,5);
+  fadeBarRGB(scanBar,0,0,0,5);
+  delay(5);
 
     // figure out which one to light up next
     if (scanBar <= 1) {
@@ -807,6 +808,7 @@ void TurBullEncabulator::stepCylon() {
 
     // light 'er up!
     fadeBar(scanBar,5);
+    delay(5);
 }
 
 // start heartbeat-style pulse in the RGB4X strips
@@ -823,13 +825,17 @@ void TurBullEncabulator::stepPulse() {
     // send a pulse up and down the strip
     for (i = 2; i < 9; i++) {
         fadeBar(i,5);
+        delay(5);
+        jumpBarRGB(i,0,0,0);
     }
-    for (i = 8; i > 1; i--) {
-        fadeBarRGB(i,0,0,0,5);
+    for (i = 7; i > 1; i--) {
+        fadeBar(i,5);
+        delay(5);
+        jumpBarRGB(i,0,0,0);
     }
 
-    // fade first bar down to half brightness
-    fadeBarRGB(1,scanRed/2,scanGreen/2,scanBlue/2,20);
+    // fade first bar down to quarter brightness
+    fadeBarRGB(1,scanRed/4,scanGreen/4,scanBlue/4,20);
 }
 
 // start bleb-bleb behavior (fade lights up or down randomly)
@@ -852,15 +858,19 @@ void TurBullEncabulator::stepBlebs() {
         if (random(4) == 0) {
             if (scanBlebs[i]) {
                 // turn it off
-                fadeBarRGB(i,0,0,0,20);
+                fadeBarRGB(i+1,0,0,0,5);
             }
             else {
                 // turn it on
-                fadeBar(i,20);
+                fadeBar(i+1,5);
             }
             scanBlebs[i] = !scanBlebs[i];
         }
     }
+}
+
+void TurBullEncabulator::drawComet() {
+    addressable.drawComet(scanRed,scanGreen,scanBlue,64,4,1);
 }
 
 // detect digital input

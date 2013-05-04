@@ -5,15 +5,13 @@ int state = 0;
 unsigned long kissStarted = 0;
 unsigned long kissEnded = 0;
 unsigned long scanStepStarted = 0;
-int score = 0;
+unsigned int score = 0;
+unsigned int i = 0;
 
 // delay (ms) between scanner steps (bars moving)
 #define SCAN_INTERVAL_LOW 800
 #define SCAN_INTERVAL_MED 400
 #define SCAN_INTERVAL_HIGH 200
-#define SCAN_BRIGHTNESS_LOW 100
-#define SCAN_BRIGHTNESS_MED 175
-#define SCAN_BRIGHTNESS_HIGH 255
 unsigned int scanInterval = 0;
 
 // buffer (ms) to allow brief breaks in contact
@@ -28,10 +26,12 @@ void setup() {
 
     // clear the decks
     Encabulator.blackoutBars();
-    Encabulator.addressable.blackout();
+
+    // pick a random color
+    Encabulator.setScannerColorSimple(random(9)+1);
 
     // draw comet to show we're ready for business
-    Encabulator.addressable.drawComet(0,255,255,64,4,1);
+    Encabulator.drawComet();
 }
 
 void loop() {
@@ -40,11 +40,14 @@ void loop() {
   // we leave this state as soon as we get input
   if (state == 0) {
       if (Encabulator.areTheyKissing()) {
-          // kill the comet
-          Encabulator.addressable.drawComet(0,0,0,64,4,1);
+          // re-color the comet
+          Encabulator.setScannerColorSimple(random(9)+1);
+          Encabulator.drawComet();
 
           // flash the bars red
-          Encabulator.lightUpBars(8, 255, 0, 0);
+          for (i = 1; i < 9; i++) {
+              Encabulator.jumpBar(i);
+          }
           delay(100);
           Encabulator.blackoutBars();
 
@@ -53,7 +56,7 @@ void loop() {
           kissEnded = 0;
           scanStepStarted = millis();
           scanInterval = SCAN_INTERVAL_LOW;
-          Encabulator.setScannerColor(SCAN_BRIGHTNESS_LOW,0,0);
+          Encabulator.setScannerMode(random(3));
           Encabulator.startScanner();
           state = 1;
       }
@@ -71,11 +74,9 @@ void loop() {
           // speed up / brighten scanner with longer kisses
           else if ((millis() - kissStarted) > (4 * KISS_QUANTUM)) {
               scanInterval = SCAN_INTERVAL_HIGH;
-              Encabulator.setScannerColor(SCAN_BRIGHTNESS_HIGH,0,0);
           }
           else if ((millis() - kissStarted) > (2 * KISS_QUANTUM)) {
               scanInterval = SCAN_INTERVAL_MED;
-              Encabulator.setScannerColor(SCAN_BRIGHTNESS_MED,0,0);
           }
 
           // step the scanner if it's been scanInterval since the last one
@@ -126,19 +127,13 @@ void loop() {
       score = ((kissEnded - kissStarted) / KISS_QUANTUM) + 1;
 
       // choose a score display randomly
-      int scoreDisplay = random(1,7);
-      if (scoreDisplay <= 1) {
+      int scoreDisplay = random(3);
+      if (scoreDisplay == 0) {
           Encabulator.lightUpBars(score, 255, 255, 255); // white bars
-      } else if (scoreDisplay == 2) {
+      } else if (scoreDisplay == 1) {
           Encabulator.lightUpBars(score, 255, 255, 0); // yellow bars
-      } else if (scoreDisplay == 3) {
+      } else {
           Encabulator.rainbowBars(score); // rainbow
-      } else if (scoreDisplay == 4) {
-          Encabulator.pulseBars(score, 255, 0, 0); // red pulse
-      } else if (scoreDisplay == 5) {
-          Encabulator.pulseBars(score, 0, 255, 0); // green pulse
-      } else if (scoreDisplay >= 6) {
-          Encabulator.pulseBars(score, 255, 255, 255); // white pulse
       }
       delay(5000);
 
@@ -146,7 +141,8 @@ void loop() {
       delay(1000);
 
       // fire up the comet to tell the next couple to step up
-      Encabulator.addressable.drawComet(0,255,255,64,4,1);
+      Encabulator.setScannerColorSimple(random(9)+1);
+      Encabulator.drawComet();
       state = 0;
   }
 
